@@ -1,11 +1,6 @@
 from nltk.corpus import wordnet as wn
 
 
-class Tree():
-    def __init__(self):
-        self.is_empty = True
-
-
 class Node():
     def __init__(self, synset):
         self.synset = synset
@@ -21,7 +16,6 @@ class Node():
 
 def build_tree_from_synset_to_entity(synset):
     heads = dfs([Node(synset)])
-    print(heads[0])
     return heads
 
 
