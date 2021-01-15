@@ -27,7 +27,7 @@ def dfs(heads):
     for head in heads:
         hypernyms = head.hypernyms()
         if len(hypernyms):
-            for hypernym in head.hypernyms():
+            for hypernym in hypernyms:
                 node = Node(hypernym)
                 node.children.append(head)
                 new_heads.extend(dfs([node]))
@@ -37,9 +37,11 @@ def dfs(heads):
 
 
 def get_top_synstets(words, pos=wn.NOUN):
-    synsets = [wn.synsets(word, pos) for word in words]
-    dog = synsets[1][0]
-    paths = build_paths_from_entity_to_synset(dog)
+    synsets = [synset for word in words for synset in wn.synsets(word, pos)]
+    paths = [
+        path for synset in synsets for path in build_paths_from_entity_to_synset(synset)]
+    for path in paths:
+        print(path)
 
 
 get_top_synstets(['cat', 'dog'])
