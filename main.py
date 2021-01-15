@@ -1,4 +1,5 @@
 from nltk.corpus import wordnet as wn
+from itertools import groupby
 
 
 class Node():
@@ -36,12 +37,33 @@ def dfs(heads):
     return new_heads
 
 
+def merge_paths(head):
+    def key(n): return n.synset
+    new_head = Node(head.synset)
+    grouped = groupby(sorted(head.children, key=key), key=key)
+    nodes = []
+    for key, group in grouped:
+        group = list(group)
+        node = Node(group[0].synset)
+        for el in group:
+            node.children.extend(el.children)
+        nodes.append(node)
+    for node in nodes:
+        new_head.children.append(merge_paths(node))
+    return new_head
+
+
 def get_top_synstets(words, pos=wn.NOUN):
     synsets = [synset for word in words for synset in wn.synsets(word, pos)]
     paths = [
         path for synset in synsets for path in build_paths_from_entity_to_synset(synset)]
     for path in paths:
         print(path)
+    head = Node(paths[0].synset)
+    for path in paths:
+        head.children.extend(path.children)
+    new_head = merge_paths(head)
+    print(new_head)
 
 
 get_top_synstets(['cat', 'dog'])
