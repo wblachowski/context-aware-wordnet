@@ -45,20 +45,37 @@ def dfs(head, nodes, val):
             dfs(node, nodes, node.support)
 
 
+def calculate_score(head):
+    def dfs(head, acc):
+        acc.append(head)
+        for child in head.children:
+            dfs(child, acc)
+    path = []
+    dfs(head, path)
+    return sum([n.support for n in path])/len(path)
+
+
 def get_top_synstets(words, pos=wn.NOUN):
+    result = []
     synsets = [wn.synsets(word, pos) for word in words]
-    for i, (word, word_synsets) in enumerate(zip(words, synsets)):
+    for i, word_synsets in enumerate(synsets):
         other_synsets = synsets[:i]+synsets[i+1:]
         other_synsets = [s for syn in other_synsets for s in syn]
+        synset_scores = []
         for word_synset in word_synsets:
             nodes = {}
             [build_graph_from_synset_to_entity(
                 synset, nodes) for synset in other_synsets]
             leaf = build_graph_from_synset_to_entity(word_synset, nodes)
-            print(f"Current word: {word}")
-            print(f"Current synset: {leaf.synset}")
-            print(f"Definition: {leaf.synset.definition()}")
-            print(leaf)
+            score = calculate_score(leaf)
+            synset_scores.append((leaf.synset, score))
+        best_synset = sorted(
+            synset_scores, key=lambda x: x[1], reverse=True)[0][0]
+        result.append(best_synset)
+    return result
 
 
-get_top_synstets(['pig', 'police', 'gun', 'cop'])
+words = ['pig', 'dog', 'gun', 'children']
+for word, synset in zip(words, get_top_synstets(words)):
+    print(f"{word}:")
+    print(f"\t{synset.definition()}")
