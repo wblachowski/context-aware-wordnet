@@ -46,12 +46,19 @@ def dfs(head, nodes, val):
 
 
 def get_top_synstets(words, pos=wn.NOUN):
-    synsets = [
-        synset for word in words for synset in wn.synsets(word, pos)]
-    nodes = {}
-    leaves = [build_graph_from_synset_to_entity(
-        synset, nodes) for synset in synsets]
-    print(leaves[0])
+    synsets = [wn.synsets(word, pos) for word in words]
+    for i, (word, word_synsets) in enumerate(zip(words, synsets)):
+        other_synsets = synsets[:i]+synsets[i+1:]
+        other_synsets = [s for syn in other_synsets for s in syn]
+        for word_synset in word_synsets:
+            nodes = {}
+            [build_graph_from_synset_to_entity(
+                synset, nodes) for synset in other_synsets]
+            leaf = build_graph_from_synset_to_entity(word_synset, nodes)
+            print(f"Current word: {word}")
+            print(f"Current synset: {leaf.synset}")
+            print(f"Definition: {leaf.synset.definition()}")
+            print(leaf)
 
 
-get_top_synstets(['car'])
+get_top_synstets(['pig', 'police', 'gun', 'cop'])
